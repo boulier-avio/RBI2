@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADF sur RBI - Radio Bear Indicator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.js"></script>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Radio Bear Indicator (RBI)</h1>
+        
+        <div class="consigne">
+            <h3>📋 Consigne :</h3>
+            <p><strong>Détermine la position de l'avion, son cap, le gisement ainsi que les relèvements QDR et QDM à partir de l'instrument.</strong></p>
+            <p><strong>N'oublie pas d'appuyer sur le bouton HDG du RBI</strong>, car il n'est pas asservi : le pilote doit régler manuellement le cap affiché.</p>
+            
+            <div class="astuce">
+                <strong>Astuce :</strong><br>
+                • Quand la rose est calée sur le nord, la pointe de la flèche indique le gisement.<br>
+                • Quand la rose est calée sur le cap, la pointe de la flèche indique le QDM et l'arrière de la flèche indique le QDR.
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="randomQDRBtn">QDR Aléatoire (1)</button>
+            <button id="randomCapBtn">Cap Aléatoire (2)</button>
+            <button id="randomBothBtn">Les deux (3)</button>
+            <button id="toggleReponseBtn">Afficher/Masquer Réponse</button>
+            <button onclick="location.href='../index.html'">← Accueil</button>
+        </div>
+
+        <div class="jeu-reponse-row">
+            <div id="rbiCanvas"></div>
+            <div id="reponsesBox">
+                <!-- Les réponses s'affichent ici via JS -->
+            </div>
+        </div>
+
+        <div class="help-buttons">
+            <button id="showTermsBtn" class="helpBtn" type="button">❓ Explication des termes (GT, QDM, QDR, Cap)</button>
+            <button id="showButtonsBtn" class="helpBtn" type="button">🔄 Explication des boutons</button>
+        </div>
+        
+        <!-- Modal pour les termes -->
+        <div id="termsModal" class="modal">
+            <div>
+                <button class="closeBtn" aria-label="Fermer la fenêtre d'aide">&times;</button>
+                <h2 style="font-size:1.1em;margin-top:0;">Que signifient GT, QDM, QDR et Cap&nbsp;?</h2>
+                <ul style="padding-left:16px;font-size:1em;line-height:1.5;">
+                    <li><strong>GT&nbsp;:</strong> <em>Gisement transmis</em> par le RBI, angle entre le nez de l'avion et la direction de la balise.</li>
+                    <li><strong>QDM&nbsp;:</strong> Cap magnétique à suivre pour aller vers la balise depuis la position de l'avion.</li>
+                    <li><strong>QDR&nbsp;:</strong> Relèvement magnétique de la balise, cap à suivre pour s'éloigner de la balise.</li>
+                    <li><strong>Cap&nbsp;:</strong> Direction (en degrés) du nez de l'avion par rapport au nord magnétique.</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Modal pour les boutons -->
+        <div id="buttonsModal" class="modal">
+            <div>
+                <button class="closeBtn" aria-label="Fermer la fenêtre d'aide">&times;</button>
+                <h2 style="font-size:1.1em;margin-top:0;">À quoi servent les boutons&nbsp;?</h2>
+                <ul style="padding-left:16px;font-size:1em;line-height:1.5;">
+                    <li><strong>QDR Aléatoire (1)&nbsp;:</strong> Fait bouger l'avion autour de la balise NDB en changeant sa position.</li>
+                    <li><strong>Cap Aléatoire (2)&nbsp;:</strong> Change le cap (direction) de l'avion sans modifier sa position.</li>
+                    <li><strong>Les deux (3)&nbsp;:</strong> Change à la fois la position et le cap de l'avion.</li>
+                    <li>Sur ordinateur cela fonctionne avec les touche 1, 2 et 3</li>
+                    <li><strong>Afficher/Masquer Réponse&nbsp;:</strong> Montre ou cache les valeurs réelles (GT, QDM, QDR, Cap).</li>
+                    <li><strong>Bouton HDG du RBI&nbsp;:</strong> Centre la rose sur le cap actuel de l'avion (clic au centre du RBI).</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="instructions">
+        <p>Lycée professionnel Roger Claustres - renaud.boulier@ac-clermont.fr</p>
+    </div>
+
+    <script src="../js/utils.js"></script>
+    <script src="../js/rbi.js"></script>
+</body>
+</html>

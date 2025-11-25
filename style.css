@@ -1,0 +1,264 @@
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    margin: 0;
+    padding: 20px;
+    background-color: #f0f0f0;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    touch-action: manipulation;
+}
+
+.container {
+    max-width: 1200px;
+    width: 100%;
+}
+
+h1 {
+    color: #333;
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+}
+
+.menu-applications {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.app-card {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-align: center;
+}
+
+.app-card:not(.coming-soon):hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.app-card.coming-soon {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.app-card h3 {
+    margin: 0 0 10px 0;
+    color: #2c3e50;
+    font-size: 1.4em;
+}
+
+.app-card p {
+    margin: 0 0 15px 0;
+    color: #7f8c8d;
+    font-weight: bold;
+}
+
+.app-description {
+    font-size: 0.9em;
+    color: #666;
+    line-height: 1.4;
+}
+
+.instructions {
+    text-align: center;
+    color: #666;
+    margin-top: 30px;
+    padding: 15px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Styles communs à toutes les applications */
+.consigne {
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 10px 0;
+    text-align: left;
+    width: 95%;
+    max-width: 900px;
+}
+
+.consigne h3 {
+    color: #856404;
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+}
+
+.consigne p {
+    margin: 5px 0;
+    font-size: 0.95em;
+    line-height: 1.4;
+}
+
+.astuce {
+    background-color: #d1ecf1;
+    border: 1px solid #bee5eb;
+    border-radius: 8px;
+    padding: 12px;
+    margin: 8px 0;
+    font-style: italic;
+    font-size: 0.9em;
+}
+
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+    width: 100vw;
+    max-width: 100vw;
+    box-sizing: border-box;
+    margin: 0;
+}
+
+button {
+    padding: 12px 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: clamp(0.8rem, 2vw, 0.9rem);
+    flex: 1;
+    min-width: 140px;
+    max-width: 200px;
+    touch-action: manipulation;
+}
+
+button:hover, button:active {
+    background-color: #45a049;
+}
+
+.jeu-reponse-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+    width: 100vw;
+    max-width: 100vw;
+    box-sizing: border-box;
+    gap: 20px;
+    margin: 0 auto;
+}
+
+#rbiCanvas {
+    flex: 3 1 0%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 200px;
+    max-width: 800px;
+}
+
+#reponsesBox {
+    flex: 1 1 0%;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    padding: 18px 12px;
+    min-width: 150px;
+    max-width: 220px;
+    font-size: 1.05em;
+    color: #d63c3c;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-top: 30px;
+}
+
+@media (max-width: 900px) {
+    .jeu-reponse-row {
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+    }
+    #reponsesBox {
+        margin-top: 8px;
+        align-items: center;
+        min-width: unset;
+        max-width: 95vw;
+        width: 95vw;
+        font-size: 1em;
+        text-align: center;
+    }
+    .consigne {
+        padding: 12px;
+        margin: 8px 10px;
+    }
+}
+
+/* Aide modale */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+    background: rgba(30,30,30,0.5);
+    align-items: center;
+    justify-content: center;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal > div {
+    background: #fff;
+    padding: 24px 20px;
+    border-radius: 12px;
+    max-width: 350px;
+    margin: 50px auto;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    text-align: left;
+    position: relative;
+}
+
+.closeBtn {
+    position: absolute; 
+    top: 5px; 
+    right: 7px; 
+    background: transparent; 
+    border: none; 
+    font-size: 1.6em; 
+    cursor: pointer;
+}
+
+.helpBtn {
+    background: #eee; 
+    color: #333;
+    border: 1px solid #ccc; 
+    border-radius: 5px; 
+    font-size: 1rem; 
+    padding: 4px 12px; 
+    cursor: pointer;
+    margin-bottom: 8px;
+}
+
+.help-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
