@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADF sur RBI - Radio Bear Indicator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            touch-action: manipulation;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            width: 100vw;
+            max-width: 100vw;
+            box-sizing: border-box;
+            padding: 0;
+        }
+        .instructions {
+            background-color: white;
+            padding: 12px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            width: 100vw;
+            max-width: 100vw;
+            box-sizing: border-box;
+            text-align: center;
+            margin: 0;
+        }
+        .instructions p {
+            margin: 8px 0;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+            line-height: 1.4;
+        }
+        .consigne {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            text-align: left;
+            width: 95%;
+            max-width: 900px;
+        }
+        .consigne h3 {
+            color: #856404;
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        .consigne p {
+            margin: 5px 0;
+            font-size: 0.95em;
+            line-height: 1.4;
+        }
+        .astuce {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 8px 0;
+            font-style: italic;
+            font-size: 0.9em;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            width: 100vw;
+            max-width: 100vw;
+            box-sizing: border-box;
+            margin: 0;
+        }
+        button {
+            padding: 12px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: clamp(0.8rem, 2vw, 0.9rem);
+            flex: 1;
+            min-width: 140px;
+            max-width: 200px;
+            touch-action: manipulation;
+        }
+        button:hover, button:active {
+            background-color: #45a049;
+        }
+        .jeu-reponse-row {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: flex-start;
+            width: 100vw;
+            max-width: 100vw;
+            box-sizing: border-box;
+            gap: 20px;
+            margin: 0 auto;
+        }
+        #rbiCanvas {
+            flex: 3 1 0%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-width: 200px;
+            max-width: 800px;
+        }
+        #reponsesBox {
+            flex: 1 1 0%;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+            padding: 18px 12px;
+            min-width: 150px;
+            max-width: 220px;
+            font-size: 1.05em;
+            color: #d63c3c;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-top: 30px;
+        }
+        @media (max-width: 900px) {
+            .jeu-reponse-row {
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
+            }
+            #reponsesBox {
+                margin-top: 8px;
+                align-items: center;
+                min-width: unset;
+                max-width: 95vw;
+                width: 95vw;
+                font-size: 1em;
+                text-align: center;
+            }
+            .consigne {
+                padding: 12px;
+                margin: 8px 10px;
+            }
+        }
+        /* Aide modale */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 9999;
+            background: rgba(30,30,30,0.5);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal > div {
+            background: #fff;
+            padding: 24px 20px;
+            border-radius: 12px;
+            max-width: 350px;
+            margin: 50px auto;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+            text-align: left;
+            position: relative;
+        }
+        .closeBtn {
+            position: absolute; 
+            top: 5px; 
+            right: 7px; 
+            background: transparent; 
+            border: none; 
+            font-size: 1.6em; 
+            cursor: pointer;
+        }
+        .helpBtn {
+            background: #eee; 
+            color: #333;
+            border: 1px solid #ccc; 
+            border-radius: 5px; 
+            font-size: 1rem; 
+            padding: 4px 12px; 
+            cursor: pointer;
+            margin-bottom: 8px;
+        }
+        .help-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Radio Bear Indicator (RBI)</h1>
+        
+        <div class="consigne">
+            <h3>📋 Consigne :</h3>
+            <p><strong>Détermine la position de l'avion, son cap, le gisement ainsi que les relèvements QDR et QDM à partir de l'instrument.</strong></p>
+            <p><strong>N'oublie pas d'appuyer sur le bouton HDG du RBI</strong>, car il n'est pas asservi : le pilote doit régler manuellement le cap affiché.</p>
+            
+            <div class="astuce">
+                <strong>Astuce :</strong><br>
+                • Quand la rose est calée sur le nord, la pointe de la flèche indique le gisement.<br>
+                • Quand la rose est calée sur le cap, la pointe de la flèche indique le QDM et l'arrière de la flèche indique le QDR.
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="randomQDRBtn">QDR Aléatoire (1)</button>
+            <button id="randomCapBtn">Cap Aléatoire (2)</button>
+            <button id="randomBothBtn">Les deux (3)</button>
+            <button id="toggleReponseBtn">Afficher/Masquer Réponse</button>
+        </div>
+        <div class="jeu-reponse-row">
+            <div id="rbiCanvas"></div>
+            <div id="reponsesBox">
+                <!-- Les réponses s'affichent ici via JS -->
+            </div>
+        </div>
+        <div class="help-buttons">
+            <button id="showTermsBtn" class="helpBtn" type="button">❓ Explication des termes (GT, QDM, QDR, Cap)</button>
+            <button id="showButtonsBtn" class="helpBtn" type="button">🔄 Explication des boutons</button>
+        </div>
+        
+        <!-- Modal pour les termes -->
+        <div id="termsModal" class="modal">
+            <div>
+                <button class="closeBtn" aria-label="Fermer la fenêtre d'aide">&times;</button>
+                <h2 style="font-size:1.1em;margin-top:0;">Que signifient GT, QDM, QDR et Cap&nbsp;?</h2>
+                <ul style="padding-left:16px;font-size:1em;line-height:1.5;">
+                    <li><strong>GT&nbsp;:</strong> <em>Gisement transmis</em> par le RBI, angle entre le nez de l'avion et la direction de la balise.</li>
+                    <li><strong>QDM&nbsp;:</strong> Cap magnétique à suivre pour aller vers la balise depuis la position de l'avion.</li>
+                    <li><strong>QDR&nbsp;:</strong> Relèvement magnétique de la balise, cap à suivre pour s'éloigner de la balise.</li>
+                    <li><strong>Cap&nbsp;:</strong> Direction (en degrés) du nez de l'avion par rapport au nord magnétique.</li>
+                     
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Modal pour les boutons -->
+        <div id="buttonsModal" class="modal">
+            <div>
+                <button class="closeBtn" aria-label="Fermer la fenêtre d'aide">&times;</button>
+                <h2 style="font-size:1.1em;margin-top:0;">À quoi servent les boutons&nbsp;?</h2>
+                <ul style="padding-left:16px;font-size:1em;line-height:1.5;">
+                    <li><strong>QDR Aléatoire (1)&nbsp;:</strong> Fait bouger l'avion autour de la balise NDB en changeant sa position.</li>
+                    <li><strong>Cap Aléatoire (2)&nbsp;:</strong> Change le cap (direction) de l'avion sans modifier sa position.</li>
+                    <li><strong>Les deux (3)&nbsp;:</strong> Change à la fois la position et le cap de l'avion.</li>
+                    <li>Sur ordinateur cela fonctionne avec les touche 1, 2 et 3</li>
+                    <li><strong>Afficher/Masquer Réponse&nbsp;:</strong> Montre ou cache les valeurs réelles (GT, QDM, QDR, Cap).</li>
+                    <li><strong>Bouton HDG du RBI&nbsp;:</strong> Centre la rose sur le cap actuel de l'avion (clic au centre du RBI).</li>
+                    
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="instructions">
+        <p>Lycée professionnel Roger Claustres - renaud.boulier@ac-clermont.fr</p>
+    </div>
+    <script>
+        let imgRBIcadre, imgAvion, imgPlane, imgRBIRose, imgRBIFleche, imgNDB;
+        let cap = 0, heading = 0, gisement = 0, rose = 0, HDG = 0;
+        let QDRvrai = 180, QDMvrai = 0, GT = -180, rot = 180;
+        let reponse = false;
+        let canvasWidth, canvasHeight, scaleFactor = 1;
+        let baseWidth = 1200;
+        let baseHeight = 700;
+        let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+        function preload() {
+            imgRBIcadre = loadImage('RBIcadre.png');
+            imgRBIRose = loadImage('RBIrose.png');
+            imgRBIFleche = loadImage('RBIFleche.png');
+            imgPlane = loadImage('plane.png');
+            imgAvion = loadImage('avion.png');
+            imgNDB = loadImage('NDB.png');
+        }
+
+        function setup() {
+            calculateCanvasSize();
+            let canvas = createCanvas(canvasWidth, canvasHeight);
+            canvas.parent('rbiCanvas');
+            imageMode(CENTER);
+            rectMode(CENTER);
+            textAlign(CENTER, CENTER);
+            textFont('Arial');
+            setupButtonEvents();
+        }
+
+        function setupButtonEvents() {
+            // Boutons de contrôle
+            document.getElementById('randomQDRBtn').addEventListener('click', randomQDR);
+            document.getElementById('randomCapBtn').addEventListener('click', randomCap);
+            document.getElementById('randomBothBtn').addEventListener('click', randomBoth);
+            document.getElementById('toggleReponseBtn').addEventListener('click', toggleReponse);
+            
+            // Événements tactiles
+            document.getElementById('randomQDRBtn').addEventListener('touchend', function(e) {e.preventDefault(); randomQDR();});
+            document.getElementById('randomCapBtn').addEventListener('touchend', function(e) {e.preventDefault(); randomCap();});
+            document.getElementById('randomBothBtn').addEventListener('touchend', function(e) {e.preventDefault(); randomBoth();});
+            document.getElementById('toggleReponseBtn').addEventListener('touchend', function(e) {e.preventDefault(); toggleReponse();});
+            
+            // Boutons d'aide
+            document.getElementById('showTermsBtn').addEventListener('click', function() {
+                document.getElementById('termsModal').classList.add('active');
+            });
+            document.getElementById('showButtonsBtn').addEventListener('click', function() {
+                document.getElementById('buttonsModal').classList.add('active');
+            });
+            
+            // Fermeture des modales
+            document.querySelectorAll('.closeBtn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    this.closest('.modal').classList.remove('active');
+                });
+            });
+            
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        this.classList.remove('active');
+                    }
+                });
+            });
+        }
+
+        function calculateCanvasSize() {
+            const maxWidth = 800; // Limite max visuelle sur desktop
+            const fullWidth = window.innerWidth > maxWidth ? maxWidth : window.innerWidth * .95;
+            const maxHeight = window.innerHeight * 0.6;
+            const widthRatio = fullWidth / baseWidth;
+            const heightRatio = maxHeight / baseHeight;
+            scaleFactor = Math.min(widthRatio, heightRatio, 1);
+            canvasWidth = baseWidth * scaleFactor;
+            canvasHeight = baseHeight * scaleFactor;
+        }
+
+        function windowResized() {
+            calculateCanvasSize();
+            resizeCanvas(canvasWidth, canvasHeight);
+        }
+
+        function draw() {
+            RBI();
+            drawAnswers();
+        }
+
+        function RBI() {
+            resetMatrix();
+            scale(scaleFactor);
+
+            let NDBX = 776;
+            let NDBY = 264;
+            let GT1 = map(GT, 0, -359, 0, 359);
+            QDMvrai = map(GT1, 0, 359, 359, 0);
+            heading = GT1 - 180;
+            QDRvrai = QDMvrai + rot;
+            background(255);
+
+            if (imgRBIcadre) image(imgRBIcadre, 268, 264); else drawRBIFrame();
+            strokeWeight(Math.max(2 / scaleFactor, 1));
+            stroke(0);
+            line(NDBX - 100, NDBY, NDBX + 100, NDBY);
+            line(NDBX, NDBY - 100, NDBX, NDBY + 100);
+            if (imgNDB) image(imgNDB, NDBX, NDBY); else drawNDB(NDBX, NDBY);
+
+            if (reponse) {
+                push();
+                translate(776, 264);
+                rotate(radians(-GT1 - 180));
+                translate(0, -100);
+                rotate(radians(heading));
+                rotate(radians(cap));
+                if (imgPlane) image(imgPlane, 0, 0); else drawPlane();
+                pop();
+            }
+
+            push();
+            translate(268, 264);
+            rotate(radians(-rose + 2));
+            if (imgRBIRose) image(imgRBIRose, 0, 0); else drawRose();
+            pop();
+
+            push();
+            translate(268, 264);
+            rotate(radians(-GT1 - cap));
+            if (imgRBIFleche) image(imgRBIFleche, 0, 0); else drawFleche();
+            pop();
+
+            if (imgAvion) image(imgAvion, 269, 264); else drawAvionCentral();
+            drawCapTriangle();
+            updateRotations();
+        }
+
+        function drawRBIFrame() {
+            fill(200);
+            stroke(0);
+            strokeWeight(Math.max(3 / scaleFactor, 1));
+            ellipse(268, 264, 536, 536);
+            fill(0);
+            noStroke();
+            for (let i = 0; i < 36; i++) {
+                push();
+                translate(268, 264);
+                rotate(radians(i * 10));
+                if (i % 3 === 0) {
+                    textSize(Math.max(16 / scaleFactor, 12));
+                    let angle = (360 - (i * 10)) % 360;
+                    push();
+                    rotate(radians(-i * 10));
+                    text(angle, 0, -230);
+                    pop();
+                    stroke(0);
+                    strokeWeight(Math.max(3 / scaleFactor, 1));
+                    line(0, -250, 0, -268);
+                } else {
+                    stroke(0);
+                    strokeWeight(Math.max(1 / scaleFactor, 0.5));
+                    line(0, -260, 0, -268);
+                }
+                pop();
+            }
+        }
+
+        function drawNDB(x, y) {
+            fill(255, 0, 0);
+            stroke(0);
+            strokeWeight(Math.max(2 / scaleFactor, 1));
+            ellipse(x, y, 80, 80);
+            fill(255);
+            textSize(Math.max(14 / scaleFactor, 10));
+            text("NDB", x, y);
+        }
+
+        function drawPlane() {
+            fill(0, 150, 0);
+            triangle(-20, 0, 20, 0, 0, -40);
+            fill(255);
+            triangle(-10, -10, 10, -10, 0, -30);
+        }
+
+        function drawRose() {
+            fill(240);
+            stroke(0);
+            strokeWeight(Math.max(2 / scaleFactor, 1));
+            ellipse(0, 0, 500, 500);
+            fill(0);
+            noStroke();
+            for (let i = 0; i < 36; i++) {
+                push();
+                rotate(radians(i * 10));
+                if (i % 3 === 0) {
+                    stroke(0);
+                    strokeWeight(Math.max(2 / scaleFactor, 1));
+                    line(0, -230, 0, -250);
+                } else {
+                    stroke(0);
+                    strokeWeight(Math.max(1 / scaleFactor, 0.5));
+                    line(0, -240, 0, -250);
+                }
+                pop();
+            }
+        }
+
+        function drawFleche() {
+            fill(255, 0, 0);
+            noStroke();
+            triangle(-10, -250, 10, -250, 0, -200);
+            rect(-5, -150, 10, 100);
+        }
+
+        function drawAvionCentral() {
+            fill(0, 0, 255);
+            triangle(-15, 0, 15, 0, 0, -30);
+            fill(255);
+            triangle(-8, -8, 8, -8, 0, -20);
+        }
+
+        function drawCapTriangle() {
+            noStroke();
+            fill(255, 255, 0, 185);
+            triangle(253, 39, 288, 39, 271, 109);
+        }
+
+        // Les réponses s'affichent dans la boîte externe à droite/sous le canvas
+        function drawAnswers() {
+            let txt = "";
+            if (reponse) {
+                txt += "GT = " + Math.round(gisement) + "°<br>";
+                txt += "QDM = " + Math.round(QDMvrai) + "°<br>";
+                txt += "QDR = " + Math.round(QDRvrai) + "°<br>";
+                txt += "Cap = " + Math.round(cap) + "°";
+            } else {
+                txt += "GT = ?<br>QDM = ?<br>QDR = ?<br>Cap = ?";
+            }
+            document.getElementById('reponsesBox').innerHTML = txt;
+        }
+
+        function updateRotations() {
+            if (rose > 360 || rose < 0) rose = 0;
+            if (gisement > 359 || gisement < 0) gisement = 0;
+            if (GT > -1 || GT < -360) GT = -359;
+            if (cap < 0 || cap > 359) cap = 0;
+            if (QDMvrai < 180) rot = 180; else if (QDMvrai > 180) rot = -180;
+            gisement = QDMvrai - cap;
+            if (gisement < 0) gisement += 360;
+        }
+
+        function mousePressed() {
+            const scaledX = mouseX / scaleFactor;
+            const scaledY = mouseY / scaleFactor;
+            if (scaledX > 229 && scaledX < 307 && scaledY > 587 && scaledY < 614) {
+                cap = (cap + 1) % 360;
+                return false;
+            }
+            if (scaledX > 229 && scaledX < 307 && scaledY > 550 && scaledY < 575) {
+                GT = (GT - 1) % 360;
+                if (GT > -1) GT = -359;
+                return false;
+            }
+            if (scaledX > 408 && scaledX < 508 && scaledY > 404 && scaledY < 504) {
+                rose = cap;
+                return false;
+            }
+        }
+
+        function touchStarted() {
+            const result = mousePressed();
+            return result === false ? false : true;
+        }
+
+        function keyPressed() {
+            if (key === '1') randomQDR();
+            else if (key === '2') randomCap();
+            else if (key === '3') randomBoth();
+        }
+
+        function randomQDR() {
+            GT = random(-360, 0);
+        }
+
+        function randomCap() {
+            cap = random(0, 359);
+        }
+
+        function randomBoth() {
+            cap = random(0, 359);
+            GT = random(-360, 0);
+        }
+
+        function toggleReponse() {
+            reponse = !reponse;
+        }
+    </script>
+</body>
+</html>
